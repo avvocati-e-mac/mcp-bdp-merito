@@ -1,0 +1,15 @@
+{
+  "name": "mcp-bdp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "inspector": "npx @modelcontextprotocol/inspector node src/server.js",
+    "save-session": "node src/auth/save-session.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "playwright": "latest",
+    "zod": "latest"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "bdp-merito": {
+      "command": "node",
+      "args": ["src/server.js"]
+    }
+  }
+}
