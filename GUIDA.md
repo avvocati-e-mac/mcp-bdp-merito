@@ -231,11 +231,25 @@ mcp-bdm-civile/
 │   │   ├── browser-factory.js    getPage() + assertNotRedirectedToLogin()
 │   │   └── utils.js              rateLimit()
 │   │
-│   └── tools/
-│       ├── search.js         cerca_provvedimenti, cerca_abstract
-│       ├── content.js        leggi_dettaglio_provvedimento, leggi_abstract, leggi_testo_provvedimento
-│       ├── navigation.js     naviga_archivio, ottieni_timeline, ottieni_precedenti
-│       └── utility.js        verifica_sessione, ottieni_materie, ottieni_distretti
+│   ├── tools/
+│   │   ├── search.js         cerca_provvedimenti, cerca_abstract
+│   │   ├── content.js        leggi_dettaglio_provvedimento, leggi_abstract, leggi_testo_provvedimento
+│   │   ├── navigation.js     naviga_archivio, ottieni_timeline, ottieni_precedenti
+│   │   ├── utility.js        verifica_sessione, ottieni_materie, ottieni_distretti
+│   │   └── workflow.js       analisi_quesito_giuridico (registrazione tool MCP)
+│   │
+│   └── workflows/
+│       ├── keyword-extractor.js   estrazione termini da quesito (funzione pura)
+│       ├── excerpt-analyzer.js    pre-scoring sugli estratti SERP (funzione pura)
+│       ├── relevance-scorer.js    scoring finale full content (funzione pura)
+│       └── analisi-quesito.js     pipeline orchestratore a due fasi
+│
+├── tests/
+│   └── workflows/
+│       ├── keyword-extractor.test.js
+│       ├── excerpt-analyzer.test.js
+│       ├── relevance-scorer.test.js
+│       └── analisi-quesito.test.js
 │
 └── spec/
     ├── tools.md              catalogo tool con schemi input/output
@@ -286,6 +300,114 @@ console.error(r.content[0].text);
 
 # Avvio server diretto (debug)
 node src/server.js
+```
+
+---
+
+---
+
+## Workflow avanzato: `analisi_quesito_giuridico`
+
+Il tool `analisi_quesito_giuridico` orchestra l'intero pipeline di ricerca in modo
+deterministico lato server. È il punto di ingresso consigliato per qualsiasi ricerca
+giuridica sulla BDP.
+
+### Funzionamento a due fasi
+
+#### Fase 1 — Scansione ampia (senza aprire documenti)
+
+1. **Estrazione termini** dal quesito in linguaggio naturale:
+   - Dizionario di 30+ sinonimi giuridici IT (locazione→contratto d'affitto, licenziamento→recesso datoriale, ecc.)
+   - Rilevamento riferimenti normativi (`art. NNN c.c.`, `d.lgs. NNN/AAAA`)
+   - Materia suggerita mappata alle label reali del select `#materia` BDP
+2. **Query parallele** su più termini (`Promise.allSettled`), con **pagine sequenziali** per ogni query (default: 5 pagine SERP per query)
+3. **Deduplicazione** per `link_dettaglio` o `estremi`
+4. **Pre-scoring sugli estratti** — senza aprire i documenti:
+
+| Componente            | Peso | Come si calcola                                          |
+|-----------------------|------|----------------------------------------------------------|
+| `copertura_termini`   | 40%  | % termini del quesito trovati in almeno un estratto      |
+| `densita_termini`     | 30%  | occorrenze totali normalizzate per lunghezza estratti    |
+| `coerenza_contestuale`| 20%  | presenza bigram/trigram del quesito negli estratti       |
+| `lunghezza_estratti`  | 10%  | 1.0 se >100 char, 0.5 se 50–100, 0.0 se <50             |
+
+Ogni provvedimento viene classificato: **APRI** (score >0.35) / **FORSE** (0.15–0.35) / **SALTA** (<0.15).
+Se nessuno raggiunge la soglia APRI, si usa il fallback sui FORSE.
+
+#### Fase 2 — Approfondimento selettivo (legge i dettagli)
+
+5. **Lettura sequenziale** dei dettagli SOLO per i candidati APRI (max `max_da_aprire`, default 15)
+6. **Scoring finale** su contenuto completo:
+
+| Componente      | Peso | Come si calcola                                                        |
+|-----------------|------|------------------------------------------------------------------------|
+| `parole_chiave` | 40%  | similarità Jaccard token quesito ↔ `parole_chiave[]` del provvedimento |
+| `materia`       | 25%  | 1.0 match esatto, 0.5 materia correlata, 0.0 irrilevante               |
+| `abstract`      | 20%  | 1.0 se `n_abstract_collegati > 0`, 0.5 se ha estratti                 |
+| `riferimenti`   | 15%  | similarità Jaccard riferimenti normativi                               |
+
+7. **Ordinamento** per `_score` decrescente, restituisce i top N
+
+### Parametri
+
+| Parametro           | Default | Descrizione                                            |
+|---------------------|---------|--------------------------------------------------------|
+| `quesito`           | —       | Quesito giuridico in linguaggio naturale (min 10 ch)  |
+| `max_provvedimenti` | 10      | Risultati finali da restituire                         |
+| `max_pagine_serp`   | 5       | Pagine SERP da analizzare per query nella Fase 1      |
+| `max_per_query`     | 15      | Risultati per pagina SERP                              |
+| `include_abstract`  | true    | Cerca anche tra gli abstract BDP                       |
+| `soglia_score`      | 0.1     | Score minimo `_score` per apparire nel risultato       |
+| `soglia_apri`       | 0.35    | Score estratti minimo per aprire il documento (Fase 2) |
+| `max_da_aprire`     | 15      | Max documenti da aprire integralmente in Fase 2        |
+
+### Output
+
+```json
+{
+  "quesito": "responsabilità del medico per omessa diagnosi",
+  "termini_utilizzati": {
+    "termini_primari": ["colpa medica", "responsabilità sanitaria", ...],
+    "materia_suggerita": "Diritto civile",
+    "riferimenti_normativi": []
+  },
+  "fase1": {
+    "pagine_analizzate": 5,
+    "provvedimenti_analizzati": 75,
+    "provvedimenti_selezionati": 8,
+    "provvedimenti_saltati": 55,
+    "distribuzione_score_estratti": { "min": 0.0, "max": 0.65, "media": 0.21 }
+  },
+  "fase2": {
+    "documenti_aperti": 8,
+    "documenti_scartati_dopo_lettura": 0
+  },
+  "provvedimenti": [
+    {
+      "estremi": "Trib. Milano, 15/01/2025 n. 123",
+      "materia": "Diritto civile",
+      "parole_chiave": ["colpa medica", "danno biologico"],
+      "_score": 0.74,
+      "_score_dettaglio": {
+        "parole_chiave": 0.8, "materia": 1.0,
+        "abstract": 1.0, "riferimenti": 0.5
+      }
+    }
+  ],
+  "n_trovati_totale": 75,
+  "n_restituiti": 10,
+  "errori": []
+}
+```
+
+### Architettura interna (workflow/)
+
+I moduli `keyword-extractor.js`, `excerpt-analyzer.js` e `relevance-scorer.js` sono
+**funzioni pure** (no I/O, no side effects) — testabili in isolamento senza Playwright.
+Solo `analisi-quesito.js` esegue I/O (browser, BDP) ed è mockato nei test.
+
+```bash
+npm test   # 39 test, tutti verdi
 ```
 
 ---
