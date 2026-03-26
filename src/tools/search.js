@@ -229,6 +229,8 @@ async function estraiCardProvvedimento(page, baseUrl) {
                       titleBtn?.getAttribute('data-id')?.match(/(.+)/);
       const link_dettaglio = null; // sarà popolato dopo il click
 
+      if (!titleText && !tipo_provvedimento) return null;
+
       return {
         tipo_provvedimento,
         area,

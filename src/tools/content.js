@@ -265,7 +265,7 @@ export function registerContentTools(server) {
         await rateLimit(page);
 
         // Clicca il bottone "Mostra" per aprire il viewer #document-modal
-        await page.locator('button[aria-label="Mostra"]').click();
+        await page.locator('button[aria-label="Mostra"]').first().click();
 
         // Attendi che il modal sia visibile e il testo caricato
         await page.waitForSelector('#document-modal.show', { timeout: 15000 });

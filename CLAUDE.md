@@ -248,6 +248,26 @@ await page.waitForTimeout(800 + Math.random() * 1200); // 800–2000ms random
 
 ---
 
+## Setup iniziale (primo avvio)
+
+All'inizio di ogni conversazione, verifica se `node_modules/` è presente:
+
+```bash
+ls node_modules 2>/dev/null | head -1
+```
+
+Se la cartella **non esiste** (progetto appena clonato), chiedi all'utente:
+
+> "La cartella `node_modules` non è presente. Vuoi che esegua `npm install` per installare le dipendenze?"
+
+Attendi la conferma prima di procedere. Se l'utente conferma, esegui:
+
+```bash
+npm install
+```
+
+---
+
 ## Comandi di sviluppo
 
 ```bash
