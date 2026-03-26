@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "bdp-merito": {
+    "bdm-civile": {
       "command": "node",
       "args": ["src/server.js"]
     }

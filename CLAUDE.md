@@ -40,7 +40,7 @@ avvio, senza richiedere un nuovo login CIE.
 ## Struttura del progetto
 
 ```
-mcp-bdp/
+mcp-bdm-civile/
 ├── CLAUDE.md                    ← questo file
 ├── package.json                 (type: "module")
 ├── .gitignore                   (session.json, node_modules)
@@ -238,7 +238,7 @@ await page.waitForTimeout(800 + Math.random() * 1200); // 800–2000ms random
 ```json
 {
   "mcpServers": {
-    "bdp-merito": {
+    "bdm-civile": {
       "command": "node",
       "args": ["/percorso/assoluto/src/server.js"]
     }
@@ -290,7 +290,7 @@ node -e "import('./src/tools/search.js').then(m => m.cercaProvvedimenti({query: 
 
 ```json
 {
-  "name": "mcp-bdp",
+  "name": "mcp-bdm-civile",
   "version": "1.0.0",
   "type": "module",
   "dependencies": {

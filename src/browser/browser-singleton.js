@@ -9,12 +9,12 @@ async function _doInit() {
   const storageState = loadStorageState();
   _browser = await chromium.launch({ headless: false });
   _browser.on('disconnected', () => {
-    console.error('[mcp-bdp] Browser disconnesso — il prossimo tool call ricrea il context');
+    console.error('[mcp-bdm-civile] Browser disconnesso — il prossimo tool call ricrea il context');
     _browser = null;
     _context = null;
   });
   _context = await _browser.newContext({ storageState });
-  console.error('[mcp-bdp] Browser singleton avviato');
+  console.error('[mcp-bdm-civile] Browser singleton avviato');
   return _context;
 }
 

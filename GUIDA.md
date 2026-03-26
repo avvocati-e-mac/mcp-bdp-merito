@@ -215,7 +215,7 @@ La BDP è una **SPA React** — i link sono `<button>` senza `href`. Per ottener
 ## Struttura file
 
 ```
-mcp-bdp/
+mcp-bdm-civile/
 ├── package.json              type: "module", dipendenze
 ├── session.json              cookie CIE (non committare mai)
 │
@@ -251,7 +251,7 @@ In `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "bdp-merito": {
+    "bdm-civile": {
       "command": "node",
       "args": ["/percorso/assoluto/src/server.js"]
     }
@@ -299,4 +299,4 @@ node src/server.js
 | BDP blocca le richieste | Troppe chiamate veloci | Il rate limit è già incorporato; non fare loop rapidi |
 | `console.log` nel codice | Corrompe il canale stdio MCP | Usare sempre `console.error()` |
 | Browser headless bloccato | Il sito rileva Playwright | `headless: false` è obbligatorio |
-| `save-session.js` non salva | CWD diversa dalla root | Eseguire sempre dalla root del progetto: `cd /percorso/mcp-bdp-merito && node src/auth/save-session.js` |
+| `save-session.js` non salva | CWD diversa dalla root | Eseguire sempre dalla root del progetto: `cd /percorso/mcp-bdm-civile && node src/auth/save-session.js` |

@@ -10,7 +10,7 @@ import { closeSharedContext } from './browser/browser-singleton.js';
 // USA SEMPRE console.error() per il logging in questo progetto.
 
 const server = new McpServer({
-  name: 'bdp-merito',
+  name: 'bdm-civile',
   version: '1.0.0',
   description: 'Consulta la Banca Dati di Merito del Ministero della Giustizia (bdp.giustizia.it)',
 });
@@ -22,11 +22,11 @@ registerUtilityTools(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
-console.error('[mcp-bdp] Server avviato su stdio');
+console.error('[mcp-bdm-civile] Server avviato su stdio');
 
 // Shutdown pulito del browser singleton
 const shutdown = async () => {
-  console.error('[mcp-bdp] Shutdown in corso...');
+  console.error('[mcp-bdm-civile] Shutdown in corso...');
   await closeSharedContext();
   process.exit(0);
 };

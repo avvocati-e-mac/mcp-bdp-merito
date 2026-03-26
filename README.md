@@ -33,8 +33,8 @@ Apri il **Terminale** (cercalo con Spotlight: `⌘ Spazio`, digita "Terminale") 
 
 ```bash
 cd ~/Documents
-git clone https://github.com/avvocati-e-mac/mcp-bdp-merito.git
-cd mcp-bdp-merito
+git clone https://github.com/avvocati-e-mac/mcp-bdm-civile.git
+cd mcp-bdm-civile
 ```
 
 ### 2. Installa le dipendenze
@@ -75,7 +75,7 @@ Apri il Terminale e incolla questo comando per trovare il percorso corretto del 
 echo "$(pwd)/src/server.js"
 ```
 
-Copia l'output (es. `/Users/tuonome/Documents/mcp-bdp-merito/src/server.js`).
+Copia l'output (es. `/Users/tuonome/Documents/mcp-bdm-civile/src/server.js`).
 
 Poi apri il file di configurazione di Claude Desktop:
 
@@ -88,17 +88,17 @@ Apri il file `claude_desktop_config.json` con un editor di testo. Se non esiste,
 ```json
 {
   "mcpServers": {
-    "bdp-merito": {
+    "bdm-civile": {
       "command": "node",
-      "args": ["/Users/tuonome/Documents/mcp-bdp-merito/src/server.js"]
+      "args": ["/Users/tuonome/Documents/mcp-bdm-civile/src/server.js"]
     }
   }
 }
 ```
 
-> ⚠️ Sostituisci `/Users/tuonome/Documents/mcp-bdp-merito/src/server.js` con il percorso copiato prima.
+> ⚠️ Sostituisci `/Users/tuonome/Documents/mcp-bdm-civile/src/server.js` con il percorso copiato prima.
 
-Se nel file c'era già altro contenuto (altri server MCP), aggiungi solo la parte `"bdp-merito": { ... }` dentro `"mcpServers"`.
+Se nel file c'era già altro contenuto (altri server MCP), aggiungi solo la parte `"bdm-civile": { ... }` dentro `"mcpServers"`.
 
 ### 5. Riavvia Claude Desktop
 
@@ -142,7 +142,7 @@ La sessione CIE dura circa **un anno**. Quando scade, Claude risponderà con un 
 Per rinnovarla, apri il Terminale nella cartella del progetto e ripeti il login:
 
 ```bash
-cd ~/Documents/mcp-bdp-merito
+cd ~/Documents/mcp-bdm-civile
 node src/auth/save-session.js
 ```
 
@@ -172,7 +172,7 @@ Verifica che il percorso nel file `claude_desktop_config.json` sia corretto, poi
 ## Struttura del progetto
 
 ```
-mcp-bdp-merito/
+mcp-bdm-civile/
 ├── src/
 │   ├── server.js              punto di ingresso del server MCP
 │   ├── auth/

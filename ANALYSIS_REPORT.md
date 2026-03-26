@@ -1,4 +1,4 @@
-# ANALYSIS REPORT — mcp-bdp
+# ANALYSIS REPORT — mcp-bdm-civile
 
 Generato: Phase 1 post-scaffold
 
@@ -23,7 +23,7 @@ Generato: Phase 1 post-scaffold
 ## Struttura file verificata
 
 ```
-mcp-bdp/
+mcp-bdm-civile/
 ├── .gitignore                   ✅ (node_modules/, session.json, .env)
 ├── package.json                 ✅ (ESM, scripts corretti, dipendenze)
 ├── spec/                        ✅ (directory creata; tools.md e bdp-structure.md da popolare)
